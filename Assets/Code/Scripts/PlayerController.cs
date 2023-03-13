@@ -7,11 +7,12 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;
     public float moveSpeed = 5f;
     public float mouseSensitivity = 1f;
-    public Transform cameraTransform;
+    
+    private Camera mainCamera;
     // Start is called before the first frame update
     void Start()
     {
-        
+        mainCamera = Camera.main;
     }
 
     // Update is called once per frame
