@@ -9,30 +9,35 @@ public class PickUpBall : MonoBehaviour
     private GameObject heldObject;
     private Rigidbody heldObjectRB;
     private Collider heldObjectCollider;
+    public LayerMask whatIsBall;
 
     [Header("Physics Parameters")]
     [SerializeField] private float pickupRange = 5.0f;
     [SerializeField] float pickupForce = 150.0f;
     [SerializeField] float dropForce = 150.0f;
-    private Camera mainCamera;
-    void Start()
-    {
-        mainCamera = Camera.main;
-    }
+    [SerializeField] float maxDistance = 5.0f;
+
+    RaycastHit hit;
 
     // Update is called once per frame
     void Update()
     {
-        Debug.DrawRay(transform.position,transform.TransformDirection(Vector3.forward * pickupRange),Color.green);
         if(Input.GetButtonDown("Fire1")){
             if(heldObject == null){
-                RaycastHit hit;
-                if(Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward),out hit,pickupRange)){
+                // RaycastHit hit;
+                // Physics.CheckSphere(transform.position,pickupRange,whatIsBall);
+                // Physics.SphereCast(transform.position,pickupRange,transform.TransformDirection(Vector3.forward),out hit,Vector3.Distance(transform.position,transform.TransformDirection(Vector3.forward) * pickupRange),whatIsBall);
+                // Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward),out hit,pickupRange)
+                if(Physics.SphereCast(transform.position,pickupRange,transform.forward,out hit,maxDistance ,whatIsBall)){
                     PickupObject(hit.collider.gameObject);
                 }
             }else{
-                DropObject();
+                ThrowObject();
             }
+        }
+
+        if(heldObject != null){
+            MoveObject();
         }
     }
 
@@ -45,6 +50,7 @@ public class PickUpBall : MonoBehaviour
 
     void PickupObject(GameObject pickObject){
         if(pickObject.GetComponent<Rigidbody>()){
+            
             heldObjectRB = pickObject.GetComponent<Rigidbody>();
             heldObjectCollider = pickObject.GetComponent<Collider>();
 
@@ -55,11 +61,13 @@ public class PickUpBall : MonoBehaviour
 
             heldObjectRB.transform.parent = holdArea;
             heldObject = pickObject;
+
+            heldObject.GetComponent<BallScript>().SetBallPickupedState();
         }
     }
 
-    void DropObject(){
-      
+    void ThrowObject(){
+        heldObject.GetComponent<BallScript>().SetBallThrowState();
         heldObjectRB.AddForce(transform.forward * dropForce,ForceMode.Impulse);
         heldObjectRB.useGravity = true;
         heldObjectRB.drag = 1;
@@ -69,5 +77,16 @@ public class PickUpBall : MonoBehaviour
         heldObjectRB.transform.parent = null;
         heldObject = null;
         heldObjectCollider = null;
-        }
+    }
+
+    private void OnDrawGizmosSelected(){
+        // RaycastHit hit;
+         // Physics.CheckSphere(transform.position,pickupRange,whatIsBall);
+        // Physics.SphereCast(transform.position,pickupRange,transform.TransformDirection(Vector3.forward),out hit,Vector3.Distance(transform.position,transform.TransformDirection(Vector3.forward) * pickupRange),whatIsBall);
+        // Physics.Raycast(transform.position,transform.TransformDirection(Vector3.forward),out hit,pickupRange)
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(transform.position + transform.forward  * maxDistance, pickupRange );
+        // Gizmos.color = Color.green;
+        // Gizmos.DrawRay(transform.position,transform.TransformDirection(Vector3.forward * pickupRange));
+    }
 }
