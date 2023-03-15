@@ -7,7 +7,8 @@ public class EnemyAiScript : MonoBehaviour
 {
     public NavMeshAgent agent;
     Transform player;
-    public LayerMask whatIsPlayer,whatisGround;
+    GameObject ball;
+    public LayerMask whatIsPlayer,whatisGround,whatIsBall;
     public int stamina;
 
     // Patrolling
@@ -25,18 +26,25 @@ public class EnemyAiScript : MonoBehaviour
 
     private void Awake(){
         player = GameObject.Find("FirstPersonPlayer").transform;
+        ball = GameObject.Find("Ball");
         agent = GetComponent<NavMeshAgent>();
     }
 
     private void Update(){
         playerInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsPlayer);
-        if(!playerInSightRange && !playerInAttackRange) Patrolling();
-        if(playerInSightRange && !playerInAttackRange) ChasePlayer();
-        if(playerInSightRange && playerInAttackRange) AttackPlayer();
+        bool isballIsOnEnemySide = ball.GetComponent<BallScript>().isOnEnemySide;
+        bool isBallPickuped = ball.GetComponent<BallScript>().isPickuped;
+        bool hasHeldObject = GetComponent<EnemyPickUpBall>().heldObject != null;
+
+        if((!playerInSightRange && !playerInAttackRange) || (!isBallPickuped && !isballIsOnEnemySide && !hasHeldObject)) Patrolling();
+        else if(isballIsOnEnemySide && !isBallPickuped && !hasHeldObject) ChaseBall();
+        else if(playerInSightRange && !playerInAttackRange && isBallPickuped) ChasePlayer();
+        else if(playerInSightRange && playerInAttackRange && isBallPickuped) AttackPlayer();
     }
 
     private void Patrolling(){
+        Debug.Log("Patrol");
         if(!walkPointsSet) SearchWalkPoint();
         else agent.SetDestination(walkPoint);
 
@@ -59,16 +67,27 @@ public class EnemyAiScript : MonoBehaviour
     }
 
     private void ChasePlayer(){
+        Debug.Log("ChasePlayer");
         agent.SetDestination(player.position);
     }
 
+    private void ChaseBall(){
+        Debug.Log("ChaseBall");
+        agent.SetDestination(ball.transform.position);
+        Vector3 distanceToBall = transform.position - ball.transform.position;
+        if(distanceToBall.magnitude < 5f){
+            GetComponent<EnemyPickUpBall>().PickupObject(ball);
+        }
+    }
+
     private void AttackPlayer(){
+        Debug.Log("AttackPlayer");
         agent.SetDestination(transform.position);
 
         // transform.LookAt(player);
 
         if(!alreadyAttacked){
-            
+            GetComponent<EnemyPickUpBall>().ThrowObject();
             // ShootAction
 
             alreadyAttacked = true;
