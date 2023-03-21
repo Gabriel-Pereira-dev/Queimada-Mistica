@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    
+    [Header("Player Movement Settings")]
     public CharacterController controller;
+    public float jumpHeight = 3f;
     public float speed = 12f;
     Vector3 velocity;
     public float gravity = -9.81f;
+    [Header("Ground Check Settings")]
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     bool isGrounded;
 
-    public float jumpHeight = 3f;
 
     // Start is called before the first frame update
     void Start()
@@ -31,9 +34,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        // float z = Input.GetAxis("Vertical");
         
-        Vector3 move = transform.right * x + transform.forward * z;
+        Vector3 move = transform.right * x;
+        // + transform.forward * z;
         controller.Move(move * speed * Time.deltaTime);
 
         if(Input.GetButtonDown("Jump") && isGrounded){

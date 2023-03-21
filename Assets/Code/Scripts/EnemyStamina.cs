@@ -16,9 +16,13 @@ public class EnemyStamina : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         bool isBall = LayerMask.LayerToName(collision.gameObject.layer) == "Ball";
+        
 
         if(isBall){
-            TakeDamage(1);
+            BallScript ball = collision.gameObject.GetComponent<BallScript>();
+            if(ball.isBeingThrownByPlayer){
+                TakeDamage(1);
+            }
         }
     }
 }

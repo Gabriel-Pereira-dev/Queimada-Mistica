@@ -11,8 +11,8 @@ public class EnemyPickUpBall : MonoBehaviour
     private Collider heldObjectCollider;
 
     [Header("Physics Parameters")]
-    [SerializeField] float pickupForce = 150.0f;
-    [SerializeField] float dropForce = 150.0f;
+    private float pickupForce = 150.0f;
+    [SerializeField] float throwForce = 150.0f;
 
     // Update is called once per frame
     void Update()
@@ -48,8 +48,8 @@ public class EnemyPickUpBall : MonoBehaviour
 
     public void ThrowObject(){
         if(heldObject != null){
-        heldObject.GetComponent<BallScript>().SetBallThrowState();
-        heldObjectRB.AddForce(transform.forward * dropForce,ForceMode.Impulse);
+        heldObject.GetComponent<BallScript>().SetBallEnemyThrowState();
+        heldObjectRB.AddForce(transform.forward * throwForce,ForceMode.Impulse);
         heldObjectRB.useGravity = true;
         heldObjectRB.drag = 1;
         heldObjectRB.constraints = RigidbodyConstraints.None;
