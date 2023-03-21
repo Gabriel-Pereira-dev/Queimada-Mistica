@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PickUpBall : MonoBehaviour
+public class PlayerPickUpBall : MonoBehaviour
 {
     [Header("Pickup Settings")]
     [SerializeField] Transform holdArea;
@@ -13,9 +13,9 @@ public class PickUpBall : MonoBehaviour
 
     [Header("Physics Parameters")]
     [SerializeField] private float pickupRange = 5.0f;
-    [SerializeField] float pickupForce = 150.0f;
-    [SerializeField] float dropForce = 150.0f;
-    [SerializeField] float maxDistance = 5.0f;
+    private float pickupForce = 150.0f;
+    [SerializeField] float throwForce = 150.0f;
+    private float maxDistance = 5.0f;
 
     RaycastHit hit;
 
@@ -67,8 +67,8 @@ public class PickUpBall : MonoBehaviour
     }
 
     void ThrowObject(){
-        heldObject.GetComponent<BallScript>().SetBallThrowState();
-        heldObjectRB.AddForce(transform.forward * dropForce,ForceMode.Impulse);
+        heldObject.GetComponent<BallScript>().SetBallPlayerThrowState();
+        heldObjectRB.AddForce(transform.forward * throwForce,ForceMode.Impulse);
         heldObjectRB.useGravity = true;
         heldObjectRB.drag = 1;
         heldObjectRB.constraints = RigidbodyConstraints.None;

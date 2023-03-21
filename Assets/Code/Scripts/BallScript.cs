@@ -5,47 +5,64 @@ using UnityEngine;
 public class BallScript : MonoBehaviour
 {
     // Start is called before the first frame update
-    public LayerMask whatIsPlayerSide,whatisEnemySide;
+    [Header("Layer Settings")]
+    public LayerMask whatIsPlayerSide;
+    public LayerMask whatisEnemySide;
+    [Header("Ball States")]
     public bool isOnPlayerSide;
     public bool isOnEnemySide;
     public bool isPickuped;
-    public bool isBeingThrown;
+    public bool isBeingThrownByPlayer;
+    public bool isBeingThrownByEnemy;
 
     
     void OnCollisionEnter(Collision collision)
     {
-        isOnEnemySide = false;
-        isOnPlayerSide = false;
-
         var layer = collision.gameObject.layer;
         int layerEnemy = Mathf.RoundToInt(Mathf.Log(whatisEnemySide.value, 2));;
         int layerPlayer = Mathf.RoundToInt(Mathf.Log(whatIsPlayerSide.value, 2));;
 
         if(layer == layerEnemy){
+            isOnPlayerSide = false;
             isOnEnemySide = true;
             isPickuped = false;
-            isBeingThrown = false;
+            isBeingThrownByPlayer = false;
+            isBeingThrownByEnemy = false;
+
             return;
         }
         if(layer == layerPlayer){
             isOnPlayerSide = true;
+            isOnEnemySide = false;
             isPickuped = false;
-            isBeingThrown = false;
+            isBeingThrownByPlayer = false;
+            isBeingThrownByEnemy = false;
+            
             return;
         }
     }
 
-    public void SetBallThrowState(){
+    public void SetBallPlayerThrowState(){
         isOnEnemySide = false;
         isOnPlayerSide = false;
         isPickuped = false;
-        isBeingThrown = true;
+        isBeingThrownByPlayer = true;
+        isBeingThrownByEnemy = false;
+    }
+
+    public void SetBallEnemyThrowState(){
+        isOnEnemySide = false;
+        isOnPlayerSide = false;
+        isPickuped = false;
+        isBeingThrownByPlayer = false;
+        isBeingThrownByEnemy = true;
     }
 
     public void SetBallPickupedState(){
         isOnEnemySide = false;
         isOnPlayerSide = false;
         isPickuped = true;
-        isBeingThrown = false;
+        isBeingThrownByPlayer = false;
+        isBeingThrownByEnemy = false;
     }
 }

@@ -5,42 +5,52 @@ using UnityEngine.AI;
 
 public class EnemyAiScript : MonoBehaviour
 {
+    [Header("Game Settings")]
     public NavMeshAgent agent;
-    Transform player;
-    GameObject ball;
-    public LayerMask whatIsPlayer,whatisGround,whatIsBall;
-    public int stamina;
-
+    public Transform player;
+    public GameObject ball;
     // Patrolling
-    public Vector3 walkPoint;
+    private Vector3 walkPoint;
     bool walkPointsSet = false;
-    public float walkPointRange;
+    private float walkPointRange = 150f;
 
     //Attacking
-    public float timeBetweenAttacks;
-    bool alreadyAttacked = false;
+    
+    [Header("Throw Settings")]
+    // Pickup
+    public float pickupRange = 5f;
 
     // States
-    public float sightRange,attackRange;
-    public bool playerInSightRange,playerInAttackRange;
+    public float sightRange;
+    [Header("Throw Settings")]
+    public float throwRange;
+    public float throwCooldown;
+    bool alreadyThrowed = false;
+
+    [Header("Layer Settings")]
+    public LayerMask whatIsPlayer;
+    public LayerMask whatIsGround;
+    public LayerMask whatIsBall;
+    [Header("Sensor States")]
+    
+    public bool playerInSightRange;
+    public bool playerInThrowRange;
 
     private void Awake(){
-        player = GameObject.Find("FirstPersonPlayer").transform;
-        ball = GameObject.Find("Ball");
         agent = GetComponent<NavMeshAgent>();
     }
 
     private void Update(){
         playerInSightRange = Physics.CheckSphere(transform.position,sightRange,whatIsPlayer);
-        playerInAttackRange = Physics.CheckSphere(transform.position,attackRange,whatIsPlayer);
-        bool isballIsOnEnemySide = ball.GetComponent<BallScript>().isOnEnemySide;
-        bool isBallPickuped = ball.GetComponent<BallScript>().isPickuped;
-        bool hasHeldObject = GetComponent<EnemyPickUpBall>().heldObject != null;
+        playerInThrowRange = Physics.CheckSphere(transform.position,throwRange,whatIsPlayer);
+        bool isBallOnEnemySide = ball.GetComponent<BallScript>().isOnEnemySide;
+        bool isBallPickupedByEnemy = ball.GetComponent<BallScript>().isPickuped && GetComponent<EnemyPickUpBall>().heldObject != null;
 
-        if((!playerInSightRange && !playerInAttackRange) || (!isBallPickuped && !isballIsOnEnemySide && !hasHeldObject)) Patrolling();
-        else if(isballIsOnEnemySide && !isBallPickuped && !hasHeldObject) ChaseBall();
-        else if(playerInSightRange && !playerInAttackRange && isBallPickuped) ChasePlayer();
-        else if(playerInSightRange && playerInAttackRange && isBallPickuped) AttackPlayer();
+        
+        if(isBallOnEnemySide && !isBallPickupedByEnemy) ChaseBall();
+        else if(playerInSightRange && !playerInThrowRange && isBallPickupedByEnemy) ChasePlayer();
+        else if(playerInSightRange && playerInThrowRange && isBallPickupedByEnemy) AttackPlayer();
+        else if(!isBallOnEnemySide && !isBallPickupedByEnemy) Patrolling();
     }
 
     private void Patrolling(){
@@ -58,7 +68,7 @@ public class EnemyAiScript : MonoBehaviour
         float randomX = Random.Range(-walkPointRange,walkPointRange);
         
         walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
-        bool isWalkable = Physics.Raycast(walkPoint,-transform.up,2f,whatisGround);
+        bool isWalkable = Physics.Raycast(walkPoint,-transform.up,2f,whatIsGround);
         if(isWalkable){
             walkPointsSet = true;
         }
@@ -75,7 +85,7 @@ public class EnemyAiScript : MonoBehaviour
         Debug.Log("ChaseBall");
         agent.SetDestination(ball.transform.position);
         Vector3 distanceToBall = transform.position - ball.transform.position;
-        if(distanceToBall.magnitude < 5f){
+        if(distanceToBall.magnitude < pickupRange){
             GetComponent<EnemyPickUpBall>().PickupObject(ball);
         }
     }
@@ -83,38 +93,27 @@ public class EnemyAiScript : MonoBehaviour
     private void AttackPlayer(){
         Debug.Log("AttackPlayer");
         agent.SetDestination(transform.position);
+        transform.LookAt(player);
 
-        // transform.LookAt(player);
-
-        if(!alreadyAttacked){
+        if(!alreadyThrowed){
             GetComponent<EnemyPickUpBall>().ThrowObject();
             // ShootAction
 
-            alreadyAttacked = true;
-            Invoke(nameof(ResetAttack),timeBetweenAttacks);
+            alreadyThrowed = true;
+            Invoke(nameof(ResetAttack),throwCooldown);
         }
     }
 
     private void ResetAttack(){
-        alreadyAttacked = false;
-    }
-
-    public void TakeDamage(int damage){
-        stamina-= damage;
-
-        if(stamina <= 0){
-            Invoke(nameof(Die),2f);
-        }
-    }
-
-    private void Die(){
-        Destroy(gameObject);
+        alreadyThrowed = false;
     }
 
     private void OnDrawGizmosSelected(){
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, throwRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, pickupRange);
     }
 }
