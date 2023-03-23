@@ -1,0 +1,7 @@
+{68c39b62-f69a-491b-800a-4a78921f9fee} bank:/Master
+{f0debbb6-87e1-0559-0643-c08663ec9976} bank:/Master.strings
+{f9a1bcda-6760-495d-ba41-159aaa5a4bcc} bus:/
+{ca3de320-f225-4eb9-a708-a9818de6fd41} bus:/Reverb
+{9a06730e-e82e-451c-918b-13620f0975ec} event:/music_stage
+{5fab6666-fc67-405e-a2ce-90b285175dac} event:/sfx_bola_lancamento
+{ceab5c24-8348-47a0-b31b-c314e762e69f} event:/sfx_step
