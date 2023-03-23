@@ -14,7 +14,6 @@ public class BallScript : MonoBehaviour
     public bool isPickuped;
     public bool isBeingThrownByPlayer;
     public bool isBeingThrownByEnemy;
-
     
     void OnCollisionEnter(Collision collision)
     {
@@ -43,6 +42,7 @@ public class BallScript : MonoBehaviour
     }
 
     public void SetBallPlayerThrowState(){
+        FMODUnity.RuntimeManager.PlayOneShot("event:/sfx_bola_lancamento");
         isOnEnemySide = false;
         isOnPlayerSide = false;
         isPickuped = false;
@@ -51,6 +51,7 @@ public class BallScript : MonoBehaviour
     }
 
     public void SetBallEnemyThrowState(){
+        FMODUnity.RuntimeManager.PlayOneShot("event:/sfx_bola_lancamento");
         isOnEnemySide = false;
         isOnPlayerSide = false;
         isPickuped = false;

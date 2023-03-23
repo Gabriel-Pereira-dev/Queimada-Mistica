@@ -16,12 +16,13 @@ public class PlayerMovement : MonoBehaviour
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     bool isGrounded;
+    private FMOD.Studio.EventInstance instance;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        instance = FMODUnity.RuntimeManager.CreateInstance("event:/sfx_step");
     }
 
     // Update is called once per frame
@@ -35,6 +36,14 @@ public class PlayerMovement : MonoBehaviour
 
         float x = Input.GetAxis("Horizontal");
         // float z = Input.GetAxis("Vertical");
+        if(x != 0 && isGrounded){
+            if(!IsPlaying(instance)){
+                instance.start();
+            }
+            
+        }else{
+            instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+        }
         
         Vector3 move = transform.right * x;
         // + transform.forward * z;
@@ -47,5 +56,11 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    bool IsPlaying(FMOD.Studio.EventInstance instance) {
+        FMOD.Studio.PLAYBACK_STATE state;   
+        instance.getPlaybackState(out state);
+        return state != FMOD.Studio.PLAYBACK_STATE.STOPPED;
     }
 }
